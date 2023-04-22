@@ -1,53 +1,54 @@
-import { array } from "prop-types";
 import React, {useState} from "react";
 
 //create your first component
 const Home = () => {
-		const [task, setTask]=useState("");
-		const [todos, setTodos]=useState(["Tarea 1","Tarea 2"])
+		const [todos, setTodos]=useState([
+			{label: "Tarea 1", done:false},
+			{label: "Tarea 2", done:false},
+			{label: "Tarea 3", done:false}
+		])
 
-		function addTask(e){
-			if(e.code=="Enter"){
-				//Aqui se agrega La tarea
-				setTodos([...todos, task])
-				setTask("")
+		function addTodo(e){
+			if(e.key=="Enter"){
+				//logica de agregar
+				let newItem={label:e.target.value,done:false}
+				let newTodos=[...todos, newItem]
+				setTodos(newTodos)
+				e.target.value = ""
 			}
 		}
-
-		function delTask(index){
-			//Aqui se elimina La tarea
+		function deleteTodo(index){
+			//logica de borrar
 			let newTodos=[...todos]
 			newTodos.splice(index,1)
 			setTodos(newTodos)
+		}
 
-			/*setTodos([
-				...todos.slice(0, index), 
-				...todos.slice(index+1)
-			])
-			*/
+		function checkTodo(index){
+			let newTodos=[...todos]
+			newTodos[index].done=!newTodos[index].done
+			setTodos(newTodos)
 		}
 
 	return (
 		<div className="card">
 			<div className="card-header">
-				<input
-				type="text"
-				className="form-control border-0"
-				placeholder="Escribe una nueva tarea"
-				value={task}
-				onChange={(e)=>setTask(e.target.value)}
-				onKeyDown={addTask}
-				/>
+				<input className="form-control border-1 mb-1" type="text" onKeyDown={addTodo}/>
+				<ol className="list-group list-group-flush">
+					{todos.map((todo,index)=><li key={index} className="list-group-item d-flex justify-content-between align-item-center">
+						<div>
+							<input 
+							className="form-check-input me-3" 
+							type="checkbox" 
+							onChange={()=>checkTodo(index)} 
+							checked={todo.done}
+							/>
+							{todo.label}
+						</div>
+					<span onClick={()=>deleteTodo(index)} className="btn btn-outline-danger btn-sm rounded-pill">X</span>
+					</li>)}
+				</ol>
 			</div>
-			<ul className="list-group list-group-flush">
-				{todos.map((todo, index)=>(
-					<li className="list-group-item d-flex justify-content-between align-item-center">
-					{todo}
-					<button onClick={()=>delTask(index)} className="btn btn-outline-danger btn-sm rounded-pill">X</button>
-				</li>
-				))}	
-			</ul>
-			<div className="card-footer">{todos.length} Items</div>
 		</div>
 	);
 };
