@@ -1,20 +1,59 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 
 //create your first component
 const Home = () => {
-		const [todos, setTodos]=useState([
-			{label: "Tarea 1", done:false},
-			{label: "Tarea 2", done:false},
-			{label: "Tarea 3", done:false}
-		])
+		const [todos, setTodos]=useState([])
+		const apiUrl="https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias"
+
+		async function LoadList(){
+			let response=await fetch (apiUrl)
+			if(response.ok){
+				let date=await response.json()
+				setTodos(data)
+			}
+			return response.status
+		}
+
+
+		useEffect(()=>{
+			LoadList(async status=>{
+				if(status==404){
+					let response=await fetch(apiUrl,{
+						method:"POST",
+						body:"[]",
+						headers:{
+							"content-type":"application/json"
+						}
+						
+					})
+					.then((res) => {
+						console.log(res);
+						return res.json();
+					})
+					.then((data) => {
+						console.log(data);
+					})
+					.catch();
+					return LoadList()
+				}
+			})
+
+		},[])
+
+		function getModal(){
+			return new bootstrap.Modal(document.getElementById('loading'))
+		}
 
 		function addTodo(e){
 			if(e.key=="Enter"){
 				//logica de agregar
+				let modal=getModal()
+				modal.show()
 				let newItem={label:e.target.value,done:false}
 				let newTodos=[...todos, newItem]
 				setTodos(newTodos)
 				e.target.value = ""
+				modal.hide()
 			}
 		}
 		function deleteTodo(index){
