@@ -30,7 +30,7 @@ const Home = () => {
 	async function deleteTodo(index) {
 		const newListTaks = [...todos]
 		let objIndex = newListTaks.findIndex(task => task.index == index)
-		newListTaks.splice(objIndex, 1)
+		newListTaks.splice(index, 1)
 		setTodos(newListTaks)
 		let response = await fetch('https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias', {
 			body: JSON.stringify(newListTaks),
