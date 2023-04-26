@@ -2,91 +2,72 @@ import React, {useState, useEffect} from "react";
 
 //create your first component
 const Home = () => {
-		const [todos, setTodos]=useState([])
-		const [task, setTask]=useState("")
-		const apiUrl="https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias"
+	const [task, setTask] = useState("");
+	const [todos, setTodos] = useState([])
+	useEffect(() => {
+		getTodoList()
+	}, [])
 
-		async function LoadList(){
-			let response = await fetch (apiUrl)
-			if(response.ok){
-				let data = await response.json()
-				setTodos(data)
-			}
-			return response.status
-		}
-
-		async function update(){
-			let response = await fetch (apiUrl,{
-				body: JSON. stringify(todos),
-				method:"PUT",
-				headers:{
-				"content-type":"application/json"
-			}
-
+	async function addTodo (e) {
+		if (e.code == "Enter") {
+			const newTask = [...todos, { label: task, done: false }]
+			let response = await fetch('https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias', {
+				body: JSON.stringify(newTask),
+				method: "PUT",
+				headers: { "Content-Type": "application/json" }
 			})
-			
-			if(response.ok){
-				let data = await response.json()
-				console.log(data)
+			if (!response.ok) {
+				console.log(response.status + ": " + response.statusText)
+				return
 			}
-			console.log (response.status)
+			let data = await response.json()
+			// setTodos([...todos, task])
+			setTodos(newTask)
+			setTask("")
+		}
+	}
+
+	async function deleteTodo(index) {
+		const newListTaks = [...todos]
+		let objIndex = newListTaks.findIndex(task => task.index == index)
+		newListTaks.splice(objIndex, 1)
+		setTodos(newListTaks)
+		let response = await fetch('https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias', {
+			body: JSON.stringify(newListTaks),
+			method: "PUT",
+			headers: { "Content-Type": "application/json" }
+		})
+		if (!response.ok) {
+			console.error(response.status + ": " + response.statusText)
 		}
 
-		useEffect(()=>{
-			LoadList().then(async status=>{
-				if(status==404){
-					let response=await fetch(apiUrl,{
-						method:"POST",
-						body:"[]",
-						headers:{
-							"content-type":"application/json"
-						}
-						
-					})
-					.then((response) => {
-						console.log(response);
-						return response.json();
-					})
-					.then((data) => {
-						console.log(data);
-					})
-					.catch();
-					return LoadList()
+	}
+
+	function checkTodo(index) {
+		let newTodos = [...todos]
+		newTodos[index].done = !newTodos[index].done
+		setTodos(newTodos)
+	}
+
+	function getTodoList() {
+		fetch('https://assets.breatheco.de/apis/fake/todos/user/Daniloemejias')
+			.then(response => {
+				if (response.ok) {
+					return response.json()
+				}
+				else {
+					console.log(response.status + ": " + response.statusText)
 				}
 			})
-
-		},[])
-
-		function addTodo(e){
-			if(e.key=="Enter"){
-				//logica de agregar
-				// LoadList()
-				// let newItem={label:e.target.value,done:false}
-				let newTodos=[...todos, {label:task,done:false}]
-				setTodos(newTodos);
-				update(newTodos);
-				// e.target.value = ""
-				setTask("")
-			}
-		}
-
-
-
-		function deleteTodo(index){
-			//logica de borrar
-			// console.log(todos)
-			let newTodos=[...todos]
-			let objIndex = newTodos.findIndex(task => task.index == index)
-			newTodos.splice(objIndex,1)
-			setTodos(newTodos)
-			update(newTodos)
-		}
-
-		function checkTodo(index){
-			let newTodos=[...todos]
-			newTodos[index].done=!newTodos[index].done
-			setTodos(newTodos)
-		}
+			.then(data => {
+				console.log(data)
+				setTodos(data)
+			})
+			.catch(error => {
+				console.error(error)
+			})
+		console.log("Iniciada la peticion")
+	}
 
 	return (
 		<div className="card">
@@ -114,6 +95,9 @@ const Home = () => {
 						<span onClick={()=>deleteTodo(index)} className="btn btn-outline-danger btn-sm rounded-pill">X</span>
 					</li>))}
 				</ol>
+			</div>
+			<div className="card-footer">
+				{todos.length} Tareas pendientes
 			</div>
 		</div>
 	);
